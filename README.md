@@ -60,7 +60,14 @@ Find the WandB dashboard [here](https://wandb.ai/suvadityamuk/nano-ddpm)
 
 ## Citation
 ```bibtex
-@misc{Mukherjee_2025, title={nanoJaxDDPM: A minimal JAX implementation of DDPM}, url={https://github.com/suvadityamuk/nanoJaxDDPM}, journal={GitHub}, author={Mukherjee, Suvaditya}, year={2025}, month={Jun}}
+@misc{Mukherjee_2025, 
+    title={nanoJaxDDPM: A minimal JAX implementation of DDPM}, 
+    url={https://github.com/suvadityamuk/nanoJaxDDPM}, 
+    website={GitHub}, 
+    author={Mukherjee, Suvaditya}, 
+    year={2025}, 
+    month={Jun}
+}
 ```
 
 ## Acknowledgements
