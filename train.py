@@ -13,6 +13,8 @@ import optax
 import matplotlib.pyplot as plt
 from model import UNet, beta_schedule
 
+LEARNING_RATE = 2e-4
+
 
 def forward_step(x_0, t, alpha_bars, noise):
     alpha_bars_sqrt = jnp.sqrt(alpha_bars[t])[:, None, None, None]
@@ -69,7 +71,7 @@ def train(model, dataloader, optimizer, alphas, alpha_bars, betas, key, steps=50
 
         if step % 500 == 0:
             samples = sample(
-                ema_model, (16, 3, 64, 64), betas, alphas, alpha_bars, sample_key
+                ema_model, (16, 3, 32, 32), betas, alphas, alpha_bars, sample_key
             )
             log_images(samples, step)
 
@@ -110,7 +112,7 @@ def preprocess_jax(img, image_size=32):
     img = img * 2.0 - 1.0
     return jnp.transpose(img, (2, 0, 1))
 
-def pil_transform(img, image_size=64):
+def pil_transform(img, image_size=32):
     img = img.resize((image_size, image_size), resample=Image.BICUBIC)
     img = jnp.array(img).astype(jnp.float32) / 255.0
     img = img * 2.0 - 1.0
@@ -216,18 +218,21 @@ if __name__ == "__main__":
 
     betas, alphas, alpha_bars = beta_schedule(0.0001, 0.02, 1000)
 
-    optimizer = optax.adamw(learning_rate=2e-5)
+    optimizer = optax.adamw(learning_rate=LEARNING_RATE)
     opt_state = optimizer.init(eqx.filter(model, eqx.is_array))
 
+    # To trigger JIT compilation
     dummy_x = jnp.zeros((16, 3, 32, 32), dtype=jnp.float32)
     dummy_t = jnp.zeros((16,), dtype=jnp.int32)
     dummy_key = jax.random.PRNGKey(42)
-
     _ = train_step(model, dummy_x, dummy_t, dummy_key, alpha_bars, optimizer, opt_state)
+    _ = sample(model, (16, 3, 32, 32), betas, alphas, alpha_bars, dummy_key)
 
-    _ = sample(model, (16, 3, 64, 64), betas, alphas, alpha_bars, dummy_key)
-
-    wandb.init(project="nano-ddpm", name="cifar10-run-TPU-v6e1", config={"image_size": 64, "T": 1000})
+    wandb.init(
+        project="nano-ddpm", 
+        name="cifar10-run-TPU-v6e1", 
+        config={"image_size": 32, "learning_rate": LEARNING_RATE}
+    )
 
     train(model, dataloader, optimizer, alphas, alpha_bars, betas, steps=10000, key=jax.random.PRNGKey(0))
 
