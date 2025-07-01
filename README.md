@@ -33,7 +33,7 @@ mkdir train_images # Create dataset to unzip split files into
 ```
 - Run training script
 ```bash
-python model.py
+python train.py
 ```
 
 ## Method (What's same, and what's not)
